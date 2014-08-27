@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:ehcache="http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+						http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring
+     					http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring/ehcache-spring-1.1.xsd">
+	
+	<ehcache:annotation-driven cache-manager="ehCacheManager" />
+    
+    <bean id="ehCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" />
+
+	<bean id="ewsDestinationProvider" class="com.microsoft.exchange.autodiscover.AutodiscoverDestinationProvider" >
+       	<property name="connectingSIDSource">
+			<bean class="com.microsoft.exchange.impl.ThreadLocalImpersonationConnectingSIDSourceImpl"/>
+		</property>
+    </bean>
+    
+	<bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate"
+		p:messageSender-ref="messageSender" p:marshaller-ref="jaxbMarshaller"
+		p:unmarshaller-ref="jaxbMarshaller" />
+
+	<bean id="autodiscoverWebServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate"
+		scope="prototype" p:messageSender-ref="messageSender"
+		p:marshaller-ref="jaxbMarshaller" p:unmarshaller-ref="jaxbMarshaller" />
+
+	<bean id="soapAutodiscoverService" class="com.microsoft.exchange.autodiscover.SoapAutodiscoverServiceImpl"
+		p:webServiceOperations-ref="autodiscoverWebServiceTemplate"
+		p:marshaller-ref="jaxbMarshaller" />
+	
+	<bean id="poxAutodiscoverService" class="com.microsoft.exchange.autodiscover.PoxAutodiscoverServiceImpl"	
+		p:httpClient-ref="httpClient"/>
+		
+	<bean id="compositeAutodiscoverService" class="com.microsoft.exchange.autodiscover.CompositeAutodiscoverServiceImpl"	 >
+		<property name="autodiscoverServices">
+			<list>
+				<ref bean="soapAutodiscoverService"/>
+				<ref bean="poxAutodiscoverService"/>
+			</list>
+		</property>
+	</bean>
+	
+		
+	<bean id="messageSender"
+		class="com.microsoft.exchange.impl.http.CustomHttpComponentsMessageSender" p:httpClient-ref="httpClient" >
+		<property name="maxTotalConnections" value="${http.maxTotalConnections:10}" />
+		<property name="defaultMaxPerRouteOverride" value="${http.maxConnectionsPerRoute:10}" />
+		<property name="connectionTimeout" value="${http.connectionTimeout:1200000}" />
+		<property name="readTimeout" value="${http.readTimeout:1200000}" />
+		<property name="preemptiveAuthEnabled" value="${http.preemptiveAuthEnabled:false}" />
+		<property name="ntlmAuthEnabled" value="${http.ntlmAuthEnabled:false}" />
+		<property name="credentials">
+			<ref bean="credential" />
+		</property>
+	</bean>
+	
+	<bean id="credential" class="org.apache.http.auth.UsernamePasswordCredentials">
+		<constructor-arg index="0" value="${username}" />
+		<constructor-arg index="1" value="${password}" />
+	</bean>
+	
+	 <bean id="httpClientConnectionManager" class="org.apache.http.impl.conn.PoolingClientConnectionManager" p:maxTotal="200"/>
+	 
+    <bean id="httpClient" class="org.apache.http.impl.client.DefaultHttpClient"
+          c:conman-ref="httpClientConnectionManager"
+          p:redirectStrategy-ref="autodiscoverRedirectStrategy">
+    </bean>
+	 <bean id="removeHttpHeaders" class="com.microsoft.exchange.impl.SoapHttpRequestHeaderInterceptor"/>
+    <bean id="registerHttpRequestInterceptor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"
+          p:targetObject-ref="httpClient" p:targetMethod="addRequestInterceptor">
+        <property name="arguments">
+            <array>
+                <ref bean="removeHttpHeaders"/>
+                <value>0</value>
+            </array>
+        </property>
+    </bean>
+	<bean id="autodiscoverRedirectStrategy" class="com.microsoft.exchange.autodiscover.AutodiscoverRedirectStrategy" />
+
+	
+</beans>

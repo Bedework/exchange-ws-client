@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to Jasig under one or more contributor license agreements. 
+	See the NOTICE file distributed with this work for additional information 
+	regarding copyright ownership. Jasig licenses this file to you under the 
+	Apache License, Version 2.0 (the "License"); you may not use this file except 
+	in compliance with the License. You may obtain a copy of the License at: 
+	http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable 
+	law or agreed to in writing, software distributed under the License is distributed 
+	on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+	express or implied. See the License for the specific language governing permissions 
+	and limitations under the License. -->
+
+<jaxb:bindings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd"
+	version="2.1">
+	<jaxb:globalBindings typesafeEnumMaxMembers="500"
+		fixedAttributeAsConstantProperty="true" enableFailFastCheck="false">
+
+		<xjc:simple />
+	</jaxb:globalBindings>
+
+	<jaxb:bindings schemaLocation="../xsd/messages.xsd">
+		<jaxb:schemaBindings>
+			<jaxb:package name="com.microsoft.exchange.messages" />
+		</jaxb:schemaBindings>
+	</jaxb:bindings>
+
+	<jaxb:bindings schemaLocation="../xsd/types.xsd">
+		<jaxb:schemaBindings>
+			<jaxb:package name="com.microsoft.exchange.types" />
+		</jaxb:schemaBindings>
+	</jaxb:bindings>
+
+	<jaxb:bindings schemaLocation="../xsd/autodiscover-messages.xsd">
+		<jaxb:schemaBindings>
+			<jaxb:package name="com.microsoft.exchange.autodiscover" />
+		</jaxb:schemaBindings>
+	</jaxb:bindings>
+	
+
+<!-- JAXB does not seem to like ms schemas... -->
+
+<!-- 	<jaxb:bindings schemaLocation="../xsd/autodiscover-pox-request.xsd"> -->
+<!-- 		<jaxb:schemaBindings> -->
+<!-- 			<jaxb:package name="com.microsoft.exchange.pox.request" /> -->
+<!-- 		</jaxb:schemaBindings> -->
+<!-- 	</jaxb:bindings> -->
+
+<!-- 	<jaxb:bindings schemaLocation="../xsd/autodiscover-pox-response-success.xsd"> -->
+<!-- 		<jaxb:schemaBindings> -->
+<!-- 			<jaxb:package name="com.microsoft.exchange.autodiscover.pox.response" /> -->
+<!-- 		</jaxb:schemaBindings> -->
+<!-- 		<jaxb:bindings xmlns:xs="http://www.w3.org/2001/XMLSchema" node=".//xs:element[@name='Autodiscover']/xs:complexType/xs:sequence/xs:element[@name='Response']/xs:complexType/xs:sequence/xs:element[@name='Account']/xs:complexType/xs:sequence/xs:element[@name='Protocol']/xs:complexType/xs:sequence/xs:element[@name='Type']"> -->
+<!-- 			<jaxb:property name="ProtocolType"/> -->
+<!-- 		</jaxb:bindings> -->
+<!-- 	</jaxb:bindings> -->
+
+<!-- 	<jaxb:bindings schemaLocation="../xsd/autodiscover-pox-response-error.xsd"> -->
+<!-- 		<jaxb:schemaBindings> -->
+<!-- 			<jaxb:package name="com.microsoft.exchange.pox2.error" /> -->
+<!-- 		</jaxb:schemaBindings> -->
+<!-- 	</jaxb:bindings> -->
+	
+
+<!-- 	<jaxb:bindings schemaLocation="../xsd/autodiscover-pox-response-redirect.xsd"> -->
+<!-- 		<jaxb:schemaBindings> -->
+<!-- 			<jaxb:package name="com.microsoft.exchange.pox3.redirect" /> -->
+<!-- 		</jaxb:schemaBindings> -->
+<!-- 	</jaxb:bindings>	 -->
+	
+</jaxb:bindings>

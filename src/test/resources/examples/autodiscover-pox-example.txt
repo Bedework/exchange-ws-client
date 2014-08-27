@@ -1,0 +1,15 @@
+
+curl -X POST -H "Content-TYpe:text/xml; charset=utf-8" -v -d @req.xml "https://autodiscover-s.outlook.com/autodiscover/autodiscover.xml" --user {username}:{password}
+
+
+usname:passowrd should be the credentials of the email address within req.xml or another user with impersonation rights for the desired email address.
+
+where req.xml is in the same directory and consists of:
+
+<?xml version="1.0" encoding="utf-8"?>
+<Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006">
+<Request>
+<EMailAddress>%s</EMailAddress>
+<AcceptableResponseSchema>http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a</AcceptableResponseSchema>
+</Request>
+</Autodiscover>

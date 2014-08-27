@@ -1,0 +1,491 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>edu.wisc.wisccal</groupId>
+	<artifactId>exchange-ws-client</artifactId>
+	<version>0.1.1-SNAPSHOT</version>
+	<name>Exchange Web Services client</name>
+	<description>Client for Microsoft Exchange Web Services</description>
+
+	<!-- <parent> -->
+	<!-- <groupId>org.sonatype.oss</groupId> -->
+	<!-- <artifactId>oss-parent</artifactId> -->
+	<!-- <version>7</version> -->
+	<!-- </parent> -->
+
+	<parent>
+		<groupId>edu.wisc.doit.code</groupId>
+		<artifactId>shared-tools-public-parent</artifactId>
+		<version>7</version>
+	</parent>
+
+	<scm>
+		<connection>scm:git:ssh://git@bitbucket.org/uwmadison_doit/exchange-ws-client.git</connection>
+		<developerConnection>scm:git:ssh://git@bitbucket.org/uwmadison_doit/exchange-ws-client.git</developerConnection>
+		<url>https://bitbucket.org/uwmadison_doit/exchange-ws-client</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<email>ctcudd@wisc.edu</email>
+			<name>Collin Cudd</name>
+			<organization>University of Wisconsin-Madison</organization>
+		</developer>
+	</developers>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- <project.resources.tcrypt.privateKey>C:\Users\ctcudd\keys\private-wiscshareurl.pem</project.resources.tcrypt.privateKey> -->
+		<!-- <project.resources.tcrypt.privateKey>/Users/ctcudd/wiscshareurl-keys/private-wiscshareurl.pem</project.resources.tcrypt.privateKey> -->
+		<!-- <commons.httpclient.version>4.2.6</commons.httpclient.version> -->
+		<commons.httpclient.version>4.2.5</commons.httpclient.version>
+
+		<commons.math.version>2.2</commons.math.version>
+		<jaxb2basicsVersion>0.6.4</jaxb2basicsVersion>
+		<junit.version>4.10</junit.version>
+		<log4j.version>1.2.16</log4j.version>
+		<mockito.version>1.9.0</mockito.version>
+		<org.springframework.version>3.2.2.RELEASE</org.springframework.version>
+		<org.springframework.ws.version>2.1.3.RELEASE</org.springframework.ws.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>code.doit-public-releases</id>
+			<url>https://code.doit.wisc.edu/maven/content/repositories/public-releases/</url>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>code.doit-public-releases</id>
+			<url>https://code.doit.wisc.edu/maven/content/repositories/public-releases/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-math</artifactId>
+				<version>${commons.math.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${commons.httpclient.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.ws</groupId>
+				<artifactId>spring-ws-core</artifactId>
+				<version>${org.springframework.ws.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.ws</groupId>
+				<artifactId>spring-ws-security</artifactId>
+				<version>${org.springframework.ws.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.xml.crypto</groupId>
+						<artifactId>xmldsig</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.xml.wsit</groupId>
+						<artifactId>wsit-rt</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.xml.wsit</groupId>
+						<artifactId>xws-security</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<artifactId>log4j</artifactId>
+				<groupId>log4j</groupId>
+				<version>${log4j.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.sun.jdmk</groupId>
+						<artifactId>jmxtools</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.jmx</groupId>
+						<artifactId>jmxri</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.jms</groupId>
+						<artifactId>jms</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>${mockito.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.8</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.ws</groupId>
+				<artifactId>spring-ws-core-tiger</artifactId>
+				<version>1.5.9</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.ws</groupId>
+				<artifactId>spring-oxm</artifactId>
+				<version>1.5.9</version>
+			</dependency>
+			<dependency>
+				<groupId>taglibs</groupId>
+				<artifactId>standard</artifactId>
+				<version>1.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+				<version>3.2.2.RELEASE</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mnode.ical4j</groupId>
+			<artifactId>ical4j</artifactId>
+			<version>1.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jvnet.jaxb2_commons</groupId>
+			<artifactId>jaxb2-basics-runtime</artifactId>
+			<version>${jaxb2basicsVersion}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.ws</groupId>
+			<artifactId>spring-ws-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.ws</groupId>
+			<artifactId>spring-ws-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<artifactId>log4j</artifactId>
+			<groupId>log4j</groupId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>5.0.3.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>xalan</groupId>
+			<artifactId>xalan</artifactId>
+			<version>2.7.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.8.1</version>
+			<type>jar</type>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>jaxen</groupId>
+			<artifactId>jaxen</artifactId>
+			<version>1.1.3</version>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>maven-cobertura-plugin</artifactId>
+					<groupId>maven-plugins</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>maven-findbugs-plugin</artifactId>
+					<groupId>maven-plugins</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xalan</artifactId>
+					<groupId>xalan</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xercesImpl</artifactId>
+					<groupId>xerces</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.7.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.googlecode.ehcache-spring-annotations</groupId>
+			<artifactId>ehcache-spring-annotations</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.6.2</version>
+		</dependency>
+				
+		
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.mycila.maven-license-plugin</groupId>
+					<artifactId>maven-license-plugin</artifactId>
+					<version>1.9.0</version>
+					<configuration>
+						<basedir>${basedir}</basedir>
+						<header>short-license-header.txt</header>
+						<strictCheck>true</strictCheck>
+						<excludes>
+							<exclude>short-license-header.txt</exclude>
+							<exclude>README.md</exclude>
+							<exclude>LICENSE</exclude>
+							<exclude>NOTICE</exclude>
+							<exclude>NOTICE.template</exclude>
+							<exclude>.gitignore</exclude>
+							<exclude>bootstrap/**</exclude>
+							<exclude>src/main/binding/bindings.xjb</exclude>
+							<exclude>src/main/resources/com/microsoft/exchange/**</exclude>
+							<exclude>src/main/resources/ews.truststore</exclude>
+							<exclude>src/main/xsd/autodiscover-messages.xsd</exclude>
+							<exclude>src/main/xsd/messages.xsd</exclude>
+							<exclude>src/main/xsd/types.xsd</exclude>
+							<exclude>src/test/resources/**</exclude>
+						</excludes>
+					</configuration>
+					<executions>
+						<execution>
+							<id>check-license</id>
+							<phase>validate</phase>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.jasig.maven</groupId>
+					<artifactId>maven-notice-plugin</artifactId>
+					<version>1.0.5</version>
+					<configuration>
+						<noticeTemplate>${basedir}/NOTICE.template</noticeTemplate>
+						<licenseMapping>
+							<param>https://source.jasig.org/licenses/license-mappings.xml</param>
+						</licenseMapping>
+
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.8</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.1</version>
+				<configuration>
+					<excludes>
+						<exclude>com/microsoft/exchange/integration/**</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.8.3</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<specVersion>2.1</specVersion>
+					<bindingDirectory>src/main/binding</bindingDirectory>
+					<schemaDirectory>src/main/xsd</schemaDirectory>
+					<extension>true</extension>
+					<args>
+						<arg>-XautoNameResolution</arg>
+						<arg>-XtoString</arg>
+						<arg>-Xequals</arg>
+						<arg>-XhashCode</arg>
+						<arg>-Xdefault-value</arg>
+						<!-- <arg>-Xinheritance</arg> -->
+						<arg>-no-header</arg>
+						<arg>-readOnly</arg>
+						<arg>-mark-generated</arg>
+					</args>
+					<plugins>
+						<plugin>
+							<groupId>org.jvnet.jaxb2_commons</groupId>
+							<artifactId>jaxb2-basics</artifactId>
+							<version>${jaxb2basicsVersion}</version>
+						</plugin>
+						<plugin>
+							<groupId>org.jvnet.jaxb2_commons</groupId>
+							<artifactId>jaxb2-default-value</artifactId>
+							<version>1.1</version>
+						</plugin>
+					</plugins>
+				</configuration>
+			</plugin>
+
+			<!-- <plugin> -->
+			<!-- <artifactId>maven-resources-plugin</artifactId> -->
+			<!-- <version>2.6</version> -->
+			<!-- <dependencies> -->
+			<!-- <dependency> -->
+			<!-- <groupId>edu.wisc.doit.tcrypt</groupId> -->
+			<!-- <artifactId>tcrypt-filtering-resources-plugin</artifactId> -->
+			<!-- <version>1.0.8</version> -->
+			<!-- </dependency> -->
+			<!-- </dependencies> -->
+			<!-- <configuration> -->
+			<!-- <mavenFilteringHints> -->
+			<!-- <mavenFilteringHint>custom</mavenFilteringHint> -->
+			<!-- </mavenFilteringHints> -->
+			<!-- </configuration> -->
+			<!-- </plugin> -->
+
+		</plugins>
+
+		<resources>
+			<!-- | Enables token decruption and general property filtering of all 
+				.properties files. | As a side effect only .properties files are copied into 
+				the the build directory. + -->
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+
+			<!-- | Enables copying of the rest of the resources into the build directory 
+				without | filtering. + -->
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>**/*.properties</exclude>
+					<exclude>**/*.xml</exclude>
+				</excludes>
+			</resource>
+		</resources>
+	</build>
+</project>
