@@ -20,9 +20,9 @@
 	</parent>
 
 	<scm>
-		<connection>scm:git:ssh://git@bitbucket.org/uwmadison_doit/exchange-ws-client.git</connection>
-		<developerConnection>scm:git:ssh://git@bitbucket.org/uwmadison_doit/exchange-ws-client.git</developerConnection>
-		<url>https://bitbucket.org/uwmadison_doit/exchange-ws-client</url>
+		<connection>scm:git:ssh://git@github.com/Bedework/exchange-ws-client.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/Bedework/exchange-ws-client.git</developerConnection>
+		<url>https://github.com/Bedework/exchange-ws-client</url>
 		<tag>HEAD</tag>
 	</scm>
 
