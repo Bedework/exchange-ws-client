@@ -9,9 +9,13 @@
 						http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring
      					http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring/ehcache-spring-1.1.xsd">
 	
-	<ehcache:annotation-driven cache-manager="ehCacheManager" />
+<!-- 	<ehcache:annotation-driven  cache-manager="autodiscoverEhCacheManager"  /> -->
     
-    <bean id="ehCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" />
+<!--     <bean id="autodiscoverEhCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"> -->
+<!--     	<property name="cacheManagerName" value="autodiscoverCacheManager"/> -->
+<!--     	<property name="shared" value="false" /> -->
+<!--     	<property name="configLocation" value="classpath:autodiscover-ehcache.xml" /> -->
+<!--     </bean> -->
 
 	<bean id="ewsDestinationProvider" class="com.microsoft.exchange.autodiscover.AutodiscoverDestinationProvider" >
        	<property name="connectingSIDSource">

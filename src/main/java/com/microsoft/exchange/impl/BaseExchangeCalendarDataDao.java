@@ -45,11 +45,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StopWatch.TaskInfo;
 
 import com.microsoft.exchange.DateHelp;
 import com.microsoft.exchange.ExchangeRequestFactory;
 import com.microsoft.exchange.ExchangeResponseUtils;
-import com.microsoft.exchange.ExchangeResponseUtilsImpl;
 import com.microsoft.exchange.ExchangeWebServices;
 import com.microsoft.exchange.exception.ExchangeExceededFindCountLimitRuntimeException;
 import com.microsoft.exchange.exception.ExchangeInvalidUPNRuntimeException;
@@ -89,6 +89,7 @@ import com.microsoft.exchange.types.FolderIdType;
 import com.microsoft.exchange.types.FolderQueryTraversalType;
 import com.microsoft.exchange.types.ItemIdType;
 import com.microsoft.exchange.types.ItemType;
+import com.microsoft.exchange.types.TaskType;
 import com.microsoft.exchange.types.TasksFolderType;
 import com.microsoft.exchange.types.TimeZoneDefinitionType;
 import com.microsoft.exchange.messages.EmptyFolder;
@@ -199,7 +200,7 @@ public class BaseExchangeCalendarDataDao {
 		return taskFolderType;
 	}
 	
-	protected BaseFolderType getFolder(String upn, FolderIdType folderIdType){
+	public BaseFolderType getFolder(String upn, FolderIdType folderIdType){
 		setContextCredentials(upn);
 		GetFolder getFolderRequest = getRequestFactory().constructGetFolderById(folderIdType);
 		GetFolderResponse getFolderResponse = getWebServices().getFolder(getFolderRequest);
@@ -454,16 +455,38 @@ public class BaseExchangeCalendarDataDao {
 		
 	}
 	
-	public Set<ItemType> getCalendarItems(String upn, Date startDate, Date endDate, Collection<FolderIdType> calendarIds){
-		Set<ItemIdType> itemIds = findCalendarItemIds(upn, startDate, endDate, calendarIds);
+	public Set<CalendarItemType> getCalendarItems(String upn, Date startDate, Date endDate, Collection<FolderIdType> calendarFolderId){
+		Set<ItemIdType> itemIds = findCalendarItemIds(upn, startDate, endDate, calendarFolderId);
 		return getCalendarItems(upn, itemIds);
 	}
 	
-	public Set<ItemType> getCalendarItems(String upn, Set<ItemIdType> itemIds) {
-		return getCalendarItemsInternal(upn, itemIds, 0);
+	public Set<CalendarItemType> getCalendarItems(String upn, Set<ItemIdType> itemIds) {
+		Set<CalendarItemType> calendarItems = new HashSet<CalendarItemType>();
+		Set<ItemType> items = getItemsInternal(upn, itemIds, 0);
+		for(ItemType item : items){
+			if(item instanceof CalendarItemType){
+				calendarItems.add( (CalendarItemType) item );
+			}else{
+				log.warn("non-calendarItemType will be excluded from result set");
+			}
+		}
+		return calendarItems;
 	}
 	
-	private Set<ItemType> getCalendarItemsInternal(String upn, Set<ItemIdType> itemIds, int depth){
+	public Set<TaskType> getTaskItems(String upn, Set<ItemIdType> itemIds) {
+		Set<TaskType> taskItems = new HashSet<TaskType>();
+		Set<ItemType> items = getItemsInternal(upn, itemIds, 0);
+		for(ItemType item : items){
+			if(item instanceof TaskType){
+				taskItems.add( (TaskType) item );
+			}else{
+				log.warn("non-TaskType will be excluded from result set");
+			}
+		}
+		return taskItems;
+	}
+	
+	private Set<ItemType> getItemsInternal(String upn, Set<ItemIdType> itemIds, int depth){
 		Validate.isTrue(StringUtils.isNotBlank(upn), "upn argument cannot be blank");
 		Validate.notEmpty(itemIds, "itemids argument cannot be empty");
 		
@@ -471,7 +494,7 @@ public class BaseExchangeCalendarDataDao {
 
 		int newDepth = depth +1;
 		if(depth > getMaxRetries()) {
-			throw new ExchangeRuntimeException("getCalendarItemsInternal(upn="+upn+",...) failed "+getMaxRetries()+ " consecutive attempts.");
+			throw new ExchangeRuntimeException("getItemsInternal(upn="+upn+",...) failed "+getMaxRetries()+ " consecutive attempts.");
 		}else {
 			setContextCredentials(upn);
 			GetItem request = getRequestFactory().constructGetItems(itemIds);	
@@ -480,13 +503,13 @@ public class BaseExchangeCalendarDataDao {
 				return getResponseUtils().parseGetItemResponse(response);
 			}catch(Exception e) {
 				long backoff = getWaitTimeExp(newDepth);
-				log.warn("getCalendarItemsInternal - failure #"+newDepth+". Sleeping for "+backoff+" before retry. " +e.getMessage());
+				log.warn("getItemsInternal - failure #"+newDepth+". Sleeping for "+backoff+" before retry. " +e.getMessage());
 				try {
 					Thread.sleep(backoff);
 				} catch (InterruptedException e1) {
 					log.warn("InterruptedException="+e1);
 				}
-				return getCalendarItemsInternal(upn, itemIds, newDepth);
+				return getItemsInternal(upn, itemIds, newDepth);
 			}
 		}
 	}

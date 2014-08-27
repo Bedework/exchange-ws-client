@@ -39,6 +39,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import net.fortuna.ical4j.model.DateTime;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
@@ -46,6 +48,7 @@ import org.joda.time.Period;
  * @author Nicholas Blair
  */
 public class DateHelp {
+	protected static final Log log = LogFactory.getLog(DateHelp.class);
 	public static final Period MAX_PERIOD = Period.days(3660);
 
 	protected static final String DATE_TIME_FORMAT = "yyyyMMdd-HHmm";
@@ -215,4 +218,39 @@ public class DateHelp {
 		return intervals;
 	}
 
+	/**
+	 * @return
+	 * @throws DatatypeConfigurationException
+	 */
+	public static XMLGregorianCalendar getXMLGregorianCalendarNow() throws DatatypeConfigurationException  {
+       GregorianCalendar gregorianCalendar = new GregorianCalendar();
+       return getXMLGregorianCalendar(gregorianCalendar);
+    }
+	
+	public static XMLGregorianCalendar getXMLGregorianCalendarNow(TimeZone timeZone) throws DatatypeConfigurationException  {
+	       GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);
+	       return getXMLGregorianCalendar(gregorianCalendar);
+	}
+	
+	private static XMLGregorianCalendar getXMLGregorianCalendar(GregorianCalendar gregorianCalendar) throws DatatypeConfigurationException{
+		DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
+        XMLGregorianCalendar now = datatypeFactory.newXMLGregorianCalendar(gregorianCalendar);
+        return now;
+	}
+	
+	public static boolean withinOneSecond(XMLGregorianCalendar a, XMLGregorianCalendar b){
+		if(a == null || b == null) return false;
+		
+		GregorianCalendar aCalendar = a.toGregorianCalendar();
+		GregorianCalendar bCalendar = b.toGregorianCalendar();
+		
+		if(aCalendar == null || bCalendar == null) return false;
+		
+		long aInMillis = aCalendar.getTimeInMillis();
+		long bInMillis = bCalendar.getTimeInMillis();
+		
+		long diff = Math.abs(aInMillis - bInMillis);
+		log.info("dates differ by "+diff+" (ms) ");
+		return (diff < 1000);
+	}
 }

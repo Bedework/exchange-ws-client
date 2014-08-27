@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.microsoft.exchange;
+package com.microsoft.exchange.impl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,6 +34,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import com.microsoft.exchange.ExchangeResponseUtils;
 import com.microsoft.exchange.exception.ExchangeCannotDeleteRuntimeException;
 import com.microsoft.exchange.exception.ExchangeExceededFindCountLimitRuntimeException;
 import com.microsoft.exchange.exception.ExchangeItemNotFoundRuntimeException;

@@ -22,9 +22,11 @@ import static org.junit.Assert.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Rule;
@@ -33,15 +35,22 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.ibm.icu.util.Region;
+import com.ibm.icu.util.TimeZone;
 import com.microsoft.exchange.exception.ExchangeCannotDeleteRuntimeException;
 import com.microsoft.exchange.exception.ExchangeRuntimeException;
 import com.microsoft.exchange.impl.BaseExchangeCalendarDataDao;
+import com.microsoft.exchange.messages.GetServerTimeZones;
+import com.microsoft.exchange.types.BaseFolderType;
+import com.microsoft.exchange.types.CalendarItemType;
 import com.microsoft.exchange.types.DisposalType;
 import com.microsoft.exchange.types.FolderIdType;
 import com.microsoft.exchange.types.ItemIdType;
+import com.microsoft.exchange.types.ItemType;
 import com.microsoft.exchange.types.TimeZoneDefinitionType;
 
 
@@ -81,13 +90,42 @@ public class BaseExchangeCalendarDataDaoIntegrationTest {
 		log.info(upn+" resolved to "+ resolved);
 	}
 	
+	/**
+	 * Executes a {@link GetServerTimeZones} request, retrieving all {@link TimeZoneDefinitionType}s from Exchange.
+	 * Attempts to map each {@link TimeZoneDefinitionType} to an {@link TimeZone} and logs the result.
+	 */
 	@Test
-	public void getTimeZones(){
+	public void getTimeZoneIds(){
+		int validTimeZoneCount = 0;
 		List<TimeZoneDefinitionType> zones = exchangeCalendarDataDao.getServerTimeZones(null, false);
 		log.info("Found "+zones.size() +" exchange time zones.");
 		for(TimeZoneDefinitionType zone: zones){
-			log.info(zone.getName());
+			String sysTimeZoneID = TimeZone.getIDForWindowsID(zone.getId(), "US");
+			
+			if(StringUtils.isNotBlank(sysTimeZoneID)){
+				log.info(zone.getId() +" mapped to "+ sysTimeZoneID);
+				
+				String windowsID = TimeZone.getWindowsID(sysTimeZoneID);
+				assertEquals(zone.getId(), windowsID);
+				validTimeZoneCount++;
+			}else{
+				log.warn("no mapping for windowsID="+zone.getId());
+			}
+			
 		}
+		log.info("Succesfully mapped "+validTimeZoneCount+"/"+zones.size()+" WindowsTimeZones");
+	}
+	
+	@Test
+	public void getPrimaryCalendarFolder(){
+		BaseFolderType primaryCalendarFolder = exchangeCalendarDataDao.getPrimaryCalendarFolder(upn);
+		assertNotNull(primaryCalendarFolder);
+	}
+	
+	@Test
+	public void getPrimaryTaskFolder(){
+		BaseFolderType primaryCalendarFolder = exchangeCalendarDataDao.getPrimaryCalendarFolder(upn);
+		assertNotNull(primaryCalendarFolder);
 	}
 	
 	@Test
@@ -96,6 +134,30 @@ public class BaseExchangeCalendarDataDaoIntegrationTest {
 		for(String folderId: folderMap.keySet()){
 			String folderName = folderMap.get(folderId);
 			log.info(folderName);
+		}
+	}
+	
+	@Test
+	public void getTaskFolders(){
+		Map<String, String> folderMap = exchangeCalendarDataDao.getTaskFolderMap(upn);
+		for(String folderId: folderMap.keySet()){
+			String folderName = folderMap.get(folderId);
+			log.info(folderName);
+		}
+	}
+	
+	@Test
+	public void deleteTaskFolders(){
+		Map<String, String> taskFoldersMap = exchangeCalendarDataDao.getTaskFolderMap(upn);
+		for(String taskId :  taskFoldersMap.keySet()){
+			String taskFolderName = taskFoldersMap.get(taskId);
+			if(taskFolderName.equals("Tasks")) continue;
+			FolderIdType taskFolderId= new FolderIdType();
+			taskFolderId.setId(taskId);
+			
+			log.info("deleting taskFolder '"+taskFolderName+"' ");
+			boolean deleteTaskFolderSuccess = exchangeCalendarDataDao.deleteFolder(upn, DisposalType.SOFT_DELETE, taskFolderId);
+			assertTrue(deleteTaskFolderSuccess);
 		}
 	}
 	
@@ -193,22 +255,20 @@ public class BaseExchangeCalendarDataDaoIntegrationTest {
 		assertNull(calendarFolderId);
 	}
 	
+
 	@Test
-	public void emptyDeleteCalendarFolders(){
-		Map<String, String> calendarFolderMap = exchangeCalendarDataDao.getCalendarFolderMap(upn);
-		for(String calendarId : calendarFolderMap.keySet()){
-			String calendarName = calendarFolderMap.get(calendarId);
-			if(calendarName.startsWith("cc")){
-				FolderIdType calendarFolderId = new FolderIdType();
-				calendarFolderId.setId(calendarId);
-				log.info("attempting to delete "+calendarName);
-				org.apache.commons.lang.time.StopWatch watch =  new org.apache.commons.lang.time.StopWatch();
-				watch.start();
-				boolean result = exchangeCalendarDataDao.deleteCalendarFolder(upn, calendarFolderId);
-				log.info("Deletion "+ (result ? "Succeded" : "Failed") +" in "+watch);
-				assertTrue(result);
-			}
-		}
+	public void createGetDeleteEmptyCalendarItem(){
+		
+		CalendarItemType calendarItem = new CalendarItemType();
+		ItemIdType calendarItemId = exchangeCalendarDataDao.createCalendarItem(upn, calendarItem);
+		assertNotNull(calendarItemId);
+		Set<CalendarItemType> createdCalendarItems = exchangeCalendarDataDao.getCalendarItems(upn, Collections.singleton(calendarItemId));
+		CalendarItemType createdCalendarItem = DataAccessUtils.singleResult(createdCalendarItems);
+		assertNotNull(createdCalendarItem);
+		assertNotNull(createdCalendarItem.getStart());
+		
+		boolean deleteSuccess = exchangeCalendarDataDao.deleteCalendarItems(upn, Collections.singleton(calendarItemId));
+		assertTrue(deleteSuccess);
+		
 	}
-	
 }
