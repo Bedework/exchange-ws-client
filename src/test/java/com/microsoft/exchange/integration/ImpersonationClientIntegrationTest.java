@@ -42,7 +42,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.microsoft.exchange.DateHelp;
-import com.microsoft.exchange.ExchangeEventConverterOLD;
+import com.microsoft.exchange.ExchangeEventConverter;
+import com.microsoft.exchange.impl.ExchangeEventConverterImpl;
 import com.microsoft.exchange.impl.ThreadLocalImpersonationConnectingSIDSourceImpl;
 import com.microsoft.exchange.messages.ArrayOfResponseMessagesType;
 import com.microsoft.exchange.messages.FindFolder;
@@ -240,51 +241,6 @@ public class ImpersonationClientIntegrationTest extends AbstractIntegrationTest 
 	}
 	
 	
-	
-//	@Test
-//	public void testGetCalendarObjects() throws JAXBException{
-//		
-//		ExchangeEventConverter eec = new ExchangeEventConverter();
-//
-//		initializeCredentials();
-//		FindItem request = erh.constructFindItemRequest(DateHelp.makeDate(startDate), DateHelp.makeDate(endDate), emailAddress, DefaultShapeNamesType.ID_ONLY);
-//		FindItemResponse response = ewsClient.findItem(request);
-//
-//		List<JAXBElement<? extends ResponseMessageType>> responseList = response.getResponseMessages()
-//				.getCreateItemResponseMessagesAndDeleteItemResponseMessagesAndGetItemResponseMessages();
-//		
-//		//iterate over responses
-//		for(JAXBElement<? extends ResponseMessageType> rm : responseList){
-//			FindItemResponseMessageType itemType = (FindItemResponseMessageType) rm.getValue();
-//			FindItemParentType rootFolder = itemType.getRootFolder();
-//			ArrayOfRealItemsType itemArray = rootFolder.getItems();
-//			List<ItemType> items = itemArray.getItemsAndMessagesAndCalendarItems();
-//				
-//			//iterate over items in each response
-//			for(ItemType item : items){
-//				CalendarItemType calItem = (CalendarItemType) item;
-//				GetItem getItemRequest = erh.constructGetItemRequest(calItem);
-//				GetItemResponse getItemResponse = ewsClient.getItem(getItemRequest);
-//				
-//				//iterate over getItemResponseMessages
-//				List<JAXBElement<? extends ResponseMessageType>> getItemResponseList = getItemResponse.getResponseMessages()
-//						.getCreateItemResponseMessagesAndDeleteItemResponseMessagesAndGetItemResponseMessages();
-//				
-//				//iterate over getItemResponseList
-//				for(JAXBElement<? extends ResponseMessageType> getItemResponseMessage : getItemResponseList){
-//					ItemInfoResponseMessageType itemInfoResponseMessageType = (ItemInfoResponseMessageType) getItemResponseMessage.getValue();
-//					ArrayOfRealItemsType itemsArray = itemInfoResponseMessageType.getItems();
-//					for(ItemType currentCalItem :  itemsArray.getItemsAndMessagesAndCalendarItems()){
-//						eec.add((CalendarItemType) currentCalItem);
-//					}
-//				}			
-//			}
-//			//eCalendars.add(new CalendarWithURI(eec.ical , "microsoftEWSTest"));
-//		}
-//		log.debug("GetCalenderObjects returned: "+ eec.ical.toString());
-//		
-//	}
-	
 	@Test
 	public void testFindCalendarObject() throws JAXBException {
 		
@@ -316,15 +272,10 @@ public class ImpersonationClientIntegrationTest extends AbstractIntegrationTest 
 			Integer itemCount = new Integer(items.size());
 			Integer currentItemNum = new Integer(1);
 			
-			ExchangeEventConverterOLD eec = new ExchangeEventConverterOLD();
-			
 			for(ItemType item : items){
 				
 				CalendarItemType calItem = (CalendarItemType) item;
-				eec.add(calItem);
-				
-				
-				
+			
 				StringBuilder sb = new StringBuilder();
 				sb.append("\n   ");
 				sb.append("ItemId: "+ calItem.getItemId().toString()+"\n   ");
@@ -388,7 +339,6 @@ public class ImpersonationClientIntegrationTest extends AbstractIntegrationTest 
 			
 			}
 			
-			log.debug("ExchangeEventConverter results: " +  eec.ical);
 			//ItemType item = itemArray.getItemsAndMessagesAndCalendarItems().get(0);
 			
 			

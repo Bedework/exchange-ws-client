@@ -7,7 +7,6 @@
 
 	<context:property-placeholder location="classpath:/exchange.properties" ignore-unresolvable="true" />
 
-	<import resource="exchangeContext-ical4jTimeZoneMap.xml"/>
 	<import resource="exchangeContext-jaxb.xml"/>
 	<import resource="exchangeContext-autodiscover.xml"/>
 

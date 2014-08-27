@@ -50,6 +50,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.microsoft.exchange.ExchangeEventConverter;
+import com.microsoft.exchange.exception.ExchangeEventConverterException;
 import com.microsoft.exchange.ical.model.EmailAddressMailboxType;
 import com.microsoft.exchange.ical.model.EmailAddressRoutingType;
 import com.microsoft.exchange.ical.model.ExchangeEndTimeZoneProperty;
@@ -105,21 +106,29 @@ public class ExchangeEventConverterImpl implements ExchangeEventConverter {
 			for(ItemType item: items){
 				if(item instanceof CalendarItemType) {
 					CalendarItemType calendarItem = (CalendarItemType) item;
-					Pair<VEvent,ArrayList<VTimeZone>> pair = convertCalendarItemType(calendarItem, upn);
+					Pair<VEvent, ArrayList<VTimeZone>> pair = null;
+					try {
+						pair = convertCalendarItemType(calendarItem, upn);
+					} catch (ExchangeEventConverterException e) {
+						log.error("Failed to convert calendarItem:" + e.getMessage());
+					}
 					
-					if(null != pair.getLeft()){
-						result.getComponents().add(pair.getLeft());
-					}else{
-						log.warn("Failed to generate VEvent for CalendarItemType="+calendarItem);
-					}
-					if(!CollectionUtils.isEmpty(pair.getRight())){
-						log.debug("Generated "+pair.getRight().size()+" VTimeZone components for CalendarItemType="+calendarItem);
-						for(VTimeZone timeZone : pair.getRight()){
-							result.getComponents().add(timeZone);
+					if(null != pair){
+						if(null != pair.getLeft()){
+							result.getComponents().add(pair.getLeft());
+						}else{
+							log.warn("Failed to generate VEvent for CalendarItemType="+calendarItem);
 						}
-					}else{
-						log.warn("Failed to generate VTimeZone for CalendarItemType="+calendarItem);
+						if(!CollectionUtils.isEmpty(pair.getRight())){
+							log.debug("Generated "+pair.getRight().size()+" VTimeZone components for CalendarItemType="+calendarItem);
+							for(VTimeZone timeZone : pair.getRight()){
+								result.getComponents().add(timeZone);
+							}
+						}else{
+							log.warn("Failed to generate VTimeZone for CalendarItemType="+calendarItem);
+						}
 					}
+					
 				}else if(item instanceof TaskType){
 					TaskType taskItem = (TaskType) item;
 					Pair<VToDo,ArrayList<VTimeZone>> pair = convertTaskType(taskItem, upn);
@@ -151,15 +160,29 @@ public class ExchangeEventConverterImpl implements ExchangeEventConverter {
 	 * @param calendarItem
 	 * @param upn
 	 * @return
+	 * @throws ExchangeEventConverterException 
 	 */
-	protected Pair<VEvent, ArrayList<VTimeZone>> convertCalendarItemType(CalendarItemType calendarItem, String upn){
+	protected Pair<VEvent, ArrayList<VTimeZone>> convertCalendarItemType(CalendarItemType calendarItem, String upn) throws ExchangeEventConverterException{
 		VEvent event = new VEvent();
 		ArrayList<VTimeZone> timeZones = new ArrayList<VTimeZone>();
+		
+		if(calendarItem.getStart() == null){
+			throw new ExchangeEventConverterException("calendarItem must have a valid start time.");
+		}
+		
+		if(calendarItem.getEnd() == null && calendarItem.getDuration() == null){
+			throw new ExchangeEventConverterException("calendarItem must have a valid end time or duration.");
+		}
+		
 		
 		//does this element have a timezone?
 		XMLGregorianCalendar start = calendarItem.getStart();
 		DtStart dtStart = new DtStart(new DateTime(start.toGregorianCalendar().getTime()));
-		DtEnd dtEnd = new DtEnd(new DateTime(calendarItem.getEnd().toGregorianCalendar().getTime()));
+		DtEnd dtEnd = null;
+		
+		if(null != calendarItem.getEnd()){
+			dtEnd = new DtEnd(new DateTime(calendarItem.getEnd().toGregorianCalendar().getTime()));
+		}
 		
 		//if all day event, must use Date
 		if(null !=  calendarItem.isIsAllDayEvent()  && calendarItem.isIsAllDayEvent()) {
@@ -169,14 +192,16 @@ public class ExchangeEventConverterImpl implements ExchangeEventConverter {
 		}
 		//this way no vtimezone is needed
 		dtStart.setUtc(true);
-		dtEnd.setUtc(true);
-					
+		
 		event.getProperties().add(dtStart);
 		log.debug("added dtStart="+dtStart);
 		
-		event.getProperties().add(dtEnd);
-		log.debug("added dtEnd="+dtEnd);
-		
+		if( null != dtEnd ){
+			dtEnd.setUtc(true);
+			event.getProperties().add(dtEnd);
+			log.debug("added dtEnd="+dtEnd);
+		}
+				
 		//in case dtEnd is not present but duration is.
 		String duration = calendarItem.getDuration();
 		if(StringUtils.isNotBlank(duration)  && event.getProperty(DtEnd.DTEND)==null){
