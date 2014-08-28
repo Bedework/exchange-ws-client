@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Bedework/exchange-ws-client.svg?branch=master)](https://travis-ci.org/Bedework/exchange-ws-client)
+
 ## exchange-ws-client
 
 Client for Exchange Web Services that is implemented using Spring Web Services.
