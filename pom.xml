@@ -13,8 +13,8 @@
 	</parent>
 
 	<scm>
-		<connection>scm:git:git://git@github.com/Bedework/exchange-ws-client.git</connection>
-		<developerConnection>scm:git:git://git@github.com/Bedework/exchange-ws-client.git</developerConnection>
+		<connection>scm:git:git://github.com/Bedework/exchange-ws-client.git</connection>
+        <developerConnection>scm:git:git@github.com:Bedework/exchange-ws-client.git</developerConnection>
 		<url>https://github.com/Bedework/exchange-ws-client</url>
 		<tag>HEAD</tag>
 	</scm>
